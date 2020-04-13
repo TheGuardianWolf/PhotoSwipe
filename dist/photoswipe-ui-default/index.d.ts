@@ -27,7 +27,7 @@ declare namespace PhotoSwipeUI_Default {
      *
      * Default global window.
      */
-    window?: null;
+    window?: Window;
 
     /**
      * Size of top & bottom bars in pixels. "bottom" parameter can be 'auto' (will calculate height of caption).
