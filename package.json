@@ -5,7 +5,11 @@
     "node": ">= 0.8.0"
   },
   "scripts": {
-    "test": "grunt jshint"
+    "test": "grunt jshint",
+    "build": "grunt",
+    "build:watch": "grunt watch",
+    "build:nosite": "grunt nosite",
+    "build:pswpbuild": "grunt pswpbuild"
   },
   "devDependencies": {
     "grunt": "~1.0.3",
