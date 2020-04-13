@@ -1,6 +1,6 @@
-/*! PhotoSwipe - v4.1.3 - 2019-01-08
+/*! PhotoSwipe - v4.1.3 - 2020-04-13
 * http://photoswipe.com
-* Copyright (c) 2019 Dmitry Semenov; */
+* Copyright (c) 2020 Dmitry Semenov; */
 (function (root, factory) { 
 	if (typeof define === 'function' && define.amd) {
 		define(factory);
@@ -13,10 +13,11 @@
 
 	'use strict';
 	var PhotoSwipe = function(template, UiClass, items, options){
-		var window = options.window || window;
-		var document = window.document;
 
 /*>>framework-bridge*/
+var window = options.window || window;
+var document = window.document;
+
 /**
  *
  * Set of generic functions used by gallery.
@@ -3200,10 +3201,10 @@ var tapTimer,
 	_dispatchTapEvent = function(origEvent, releasePoint, pointerType) {		
 		var e = document.createEvent( 'CustomEvent' ),
 			eDetail = {
-				origEvent:origEvent, 
-				pointerType:pointerType || 'touch',
-				releasePoint: releasePoint, 
-				target:origEvent.target,
+				origEvent: origEvent,
+				pointerType: pointerType || 'touch',
+				releasePoint: releasePoint,
+				target: origEvent.target,
 				rightClick: pointerType === 'mouse' && origEvent.which === 3
 			};
 
