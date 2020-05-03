@@ -3283,18 +3283,25 @@ _registerModule('Tap', {
  *
  */
 
-function getScrollParent(node) {
-  var isElement = node instanceof HTMLElement;
-  var overflowY = isElement && window.getComputedStyle(node).overflowY;
-  var isScrollable = overflowY !== 'visible' && overflowY !== 'hidden';
+function getScrollParent(element, includeHidden) {
+  var style = getComputedStyle(element);
+  var excludeStaticParent = style.position === 'absolute';
+  var overflowRegex = includeHidden ? /(auto|scroll|hidden)/ : /(auto|scroll)/;
 
-  if (!node) {
-    return null;
-  } else if (isScrollable && node.scrollHeight >= node.clientHeight) {
-    return node;
+  if (style.position === 'fixed') return document.body;
+  for (var parent = element; (parent = parent.parentElement); ) {
+    style = getComputedStyle(parent);
+    if (excludeStaticParent && style.position === 'static') {
+      continue;
+    }
+    if (
+      overflowRegex.test(style.overflow + style.overflowY + style.overflowX) &&
+      parent.scrollHeight > parent.clientHeight
+    )
+      return parent;
   }
 
-  return getScrollParent(node.parentNode) || document.body;
+  return document.body;
 }
 
 var _wheelDelta;
