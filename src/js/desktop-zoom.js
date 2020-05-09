@@ -9,26 +9,26 @@
  *
  */
 
-function getScrollParent(element, includeHidden) {
-  var style = getComputedStyle(element);
-  var excludeStaticParent = style.position === 'absolute';
-  var overflowRegex = includeHidden ? /(auto|scroll|hidden)/ : /(auto|scroll)/;
+// function getScrollParent(element, includeHidden) {
+//   var style = getComputedStyle(element);
+//   var excludeStaticParent = style.position === 'absolute';
+//   var overflowRegex = includeHidden ? /(auto|scroll|hidden)/ : /(auto|scroll)/;
 
-  if (style.position === 'fixed') return document.body;
-  for (var parent = element; (parent = parent.parentElement); ) {
-    style = getComputedStyle(parent);
-    if (excludeStaticParent && style.position === 'static') {
-      continue;
-    }
-    if (
-      overflowRegex.test(style.overflow + style.overflowY + style.overflowX) &&
-      parent.scrollHeight > parent.clientHeight
-    )
-      return parent;
-  }
+//   if (style.position === 'fixed') return document.body;
+//   for (var parent = element; (parent = parent.parentElement); ) {
+//     style = getComputedStyle(parent);
+//     if (excludeStaticParent && style.position === 'static') {
+//       continue;
+//     }
+//     if (
+//       overflowRegex.test(style.overflow + style.overflowY + style.overflowX) &&
+//       parent.scrollHeight > parent.clientHeight
+//     )
+//       return parent;
+//   }
 
-  return document.body;
-}
+//   return document.body;
+// }
 
 var _wheelDelta;
 
@@ -104,7 +104,7 @@ _registerModule('DesktopZoom', {
     },
 
     handleMouseWheel: function (e) {
-      if (!template.contains(getScrollParent(e.target))) {
+      if (!_container || _container.contains(e.target)) {
         if (_currZoomLevel <= self.currItem.fitRatio) {
           if (_options.modal) {
             if (!_options.closeOnScroll || _numAnimations || _isDragging) {

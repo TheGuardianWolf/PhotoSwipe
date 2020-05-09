@@ -1,4 +1,4 @@
-/*! PhotoSwipe - v4.1.3 - 2020-05-04
+/*! PhotoSwipe - v4.1.3 - 2020-05-10
 * http://photoswipe.com
 * Copyright (c) 2020 Dmitry Semenov; */
 (function (root, factory) { 
@@ -401,6 +401,7 @@ var _isOpen,
 	_windowVisibleSize = {},
 	_renderMaxResolution = false,
 	_orientationChangeTimeout,
+	_container = template.querySelector('.pswp__container'),
 
 
 	// Registers PhotoSWipe module (History, Controller ...)
@@ -1642,117 +1643,117 @@ var _gestureStartTime,
 
 	// Pointerdown/touchstart/mousedown handler
 	_onDragStart = function(e) {
-
-		// Allow dragging only via left mouse button.
-		// As this handler is not added in IE8 - we ignore e.which
-		// 
-		// http://www.quirksmode.org/js/events_properties.html
-		// https://developer.mozilla.org/en-US/docs/Web/API/event.button
-		if(e.type === 'mousedown' && e.button > 0  ) {
-			return;
-		}
-
-		if(_initialZoomRunning) {
-			e.preventDefault();
-			return;
-		}
-
-		if(_oldAndroidTouchEndTimeout && e.type === 'mousedown') {
-			return;
-		}
-
-		if(_preventDefaultEventBehaviour(e, true)) {
-			e.preventDefault();
-		}
-
-
-
-		_shout('pointerDown');
-
-		if(_pointerEventEnabled) {
-			var pointerIndex = framework.arraySearch(_currPointers, e.pointerId, 'id');
-			if(pointerIndex < 0) {
-				pointerIndex = _currPointers.length;
+		if (!_container || _container.contains(e.target)) {
+			// Allow dragging only via left mouse button.
+			// As this handler is not added in IE8 - we ignore e.which
+			// 
+			// http://www.quirksmode.org/js/events_properties.html
+			// https://developer.mozilla.org/en-US/docs/Web/API/event.button
+			if(e.type === 'mousedown' && e.button > 0  ) {
+				return;
 			}
-			_currPointers[pointerIndex] = {x:e.pageX, y:e.pageY, id: e.pointerId};
-		}
-		
+
+			if(_initialZoomRunning) {
+				e.preventDefault();
+				return;
+			}
+
+			if(_oldAndroidTouchEndTimeout && e.type === 'mousedown') {
+				return;
+			}
+
+			if(_preventDefaultEventBehaviour(e, true)) {
+				e.preventDefault();
+			}
 
 
-		var startPointsList = _getTouchPoints(e),
-			numPoints = startPointsList.length;
 
-		_currentPoints = null;
+			_shout('pointerDown');
 
-		_stopAllAnimations();
-
-		// init drag
-		if(!_isDragging || numPoints === 1) {
-
+			if(_pointerEventEnabled) {
+				var pointerIndex = framework.arraySearch(_currPointers, e.pointerId, 'id');
+				if(pointerIndex < 0) {
+					pointerIndex = _currPointers.length;
+				}
+				_currPointers[pointerIndex] = {x:e.pageX, y:e.pageY, id: e.pointerId};
+			}
 			
 
-			_isDragging = _isFirstMove = true;
-			framework.bind(window, _upMoveEvents, self);
 
-			_isZoomingIn = 
-				_wasOverInitialZoom = 
-				_opacityChanged = 
-				_verticalDragInitiated = 
-				_mainScrollShifted = 
-				_moved = 
-				_isMultitouch = 
-				_zoomStarted = false;
+			var startPointsList = _getTouchPoints(e),
+				numPoints = startPointsList.length;
 
-			_direction = null;
+			_currentPoints = null;
 
-			_shout('firstTouchStart', startPointsList);
+			_stopAllAnimations();
 
-			_equalizePoints(_startPanOffset, _panOffset);
+			// init drag
+			if(!_isDragging || numPoints === 1) {
 
-			_currPanDist.x = _currPanDist.y = 0;
-			_equalizePoints(_currPoint, startPointsList[0]);
-			_equalizePoints(_startPoint, _currPoint);
+				
 
-			//_equalizePoints(_startMainScrollPos, _mainScrollPos);
-			_startMainScrollPos.x = _slideSize.x * _currPositionIndex;
+				_isDragging = _isFirstMove = true;
+				framework.bind(window, _upMoveEvents, self);
 
-			_posPoints = [{
-				x: _currPoint.x,
-				y: _currPoint.y
-			}];
+				_isZoomingIn = 
+					_wasOverInitialZoom = 
+					_opacityChanged = 
+					_verticalDragInitiated = 
+					_mainScrollShifted = 
+					_moved = 
+					_isMultitouch = 
+					_zoomStarted = false;
 
-			_gestureCheckSpeedTime = _gestureStartTime = _getCurrentTime();
+				_direction = null;
 
-			//_mainScrollAnimationEnd(true);
-			_calculatePanBounds( _currZoomLevel, true );
-			
-			// Start rendering
-			_stopDragUpdateLoop();
-			_dragUpdateLoop();
-			
+				_shout('firstTouchStart', startPointsList);
+
+				_equalizePoints(_startPanOffset, _panOffset);
+
+				_currPanDist.x = _currPanDist.y = 0;
+				_equalizePoints(_currPoint, startPointsList[0]);
+				_equalizePoints(_startPoint, _currPoint);
+
+				//_equalizePoints(_startMainScrollPos, _mainScrollPos);
+				_startMainScrollPos.x = _slideSize.x * _currPositionIndex;
+
+				_posPoints = [{
+					x: _currPoint.x,
+					y: _currPoint.y
+				}];
+
+				_gestureCheckSpeedTime = _gestureStartTime = _getCurrentTime();
+
+				//_mainScrollAnimationEnd(true);
+				_calculatePanBounds( _currZoomLevel, true );
+				
+				// Start rendering
+				_stopDragUpdateLoop();
+				_dragUpdateLoop();
+				
+			}
+
+			// init zoom
+			if(!_isZooming && numPoints > 1 && !_mainScrollAnimating && !_mainScrollShifted) {
+				_startZoomLevel = _currZoomLevel;
+				_zoomStarted = false; // true if zoom changed at least once
+
+				_isZooming = _isMultitouch = true;
+				_currPanDist.y = _currPanDist.x = 0;
+
+				_equalizePoints(_startPanOffset, _panOffset);
+
+				_equalizePoints(p, startPointsList[0]);
+				_equalizePoints(p2, startPointsList[1]);
+
+				_findCenterOfPoints(p, p2, _currCenterPoint);
+
+				_midZoomPoint.x = Math.abs(_currCenterPoint.x) - _panOffset.x;
+				_midZoomPoint.y = Math.abs(_currCenterPoint.y) - _panOffset.y;
+				_currPointsDistance = _startPointsDistance = _calculatePointsDistance(p, p2);
+			}
+
 		}
-
-		// init zoom
-		if(!_isZooming && numPoints > 1 && !_mainScrollAnimating && !_mainScrollShifted) {
-			_startZoomLevel = _currZoomLevel;
-			_zoomStarted = false; // true if zoom changed at least once
-
-			_isZooming = _isMultitouch = true;
-			_currPanDist.y = _currPanDist.x = 0;
-
-			_equalizePoints(_startPanOffset, _panOffset);
-
-			_equalizePoints(p, startPointsList[0]);
-			_equalizePoints(p2, startPointsList[1]);
-
-			_findCenterOfPoints(p, p2, _currCenterPoint);
-
-			_midZoomPoint.x = Math.abs(_currCenterPoint.x) - _panOffset.x;
-			_midZoomPoint.y = Math.abs(_currCenterPoint.y) - _panOffset.y;
-			_currPointsDistance = _startPointsDistance = _calculatePointsDistance(p, p2);
-		}
-
-
 	},
 
 	// Pointermove/touchmove/mousemove handler
@@ -3283,26 +3284,26 @@ _registerModule('Tap', {
  *
  */
 
-function getScrollParent(element, includeHidden) {
-  var style = getComputedStyle(element);
-  var excludeStaticParent = style.position === 'absolute';
-  var overflowRegex = includeHidden ? /(auto|scroll|hidden)/ : /(auto|scroll)/;
+// function getScrollParent(element, includeHidden) {
+//   var style = getComputedStyle(element);
+//   var excludeStaticParent = style.position === 'absolute';
+//   var overflowRegex = includeHidden ? /(auto|scroll|hidden)/ : /(auto|scroll)/;
 
-  if (style.position === 'fixed') return document.body;
-  for (var parent = element; (parent = parent.parentElement); ) {
-    style = getComputedStyle(parent);
-    if (excludeStaticParent && style.position === 'static') {
-      continue;
-    }
-    if (
-      overflowRegex.test(style.overflow + style.overflowY + style.overflowX) &&
-      parent.scrollHeight > parent.clientHeight
-    )
-      return parent;
-  }
+//   if (style.position === 'fixed') return document.body;
+//   for (var parent = element; (parent = parent.parentElement); ) {
+//     style = getComputedStyle(parent);
+//     if (excludeStaticParent && style.position === 'static') {
+//       continue;
+//     }
+//     if (
+//       overflowRegex.test(style.overflow + style.overflowY + style.overflowX) &&
+//       parent.scrollHeight > parent.clientHeight
+//     )
+//       return parent;
+//   }
 
-  return document.body;
-}
+//   return document.body;
+// }
 
 var _wheelDelta;
 
@@ -3378,7 +3379,7 @@ _registerModule('DesktopZoom', {
     },
 
     handleMouseWheel: function (e) {
-      if (!template.contains(getScrollParent(e.target))) {
+      if (!_container || _container.contains(e.target)) {
         if (_currZoomLevel <= self.currItem.fitRatio) {
           if (_options.modal) {
             if (!_options.closeOnScroll || _numAnimations || _isDragging) {

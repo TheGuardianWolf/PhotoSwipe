@@ -100,6 +100,7 @@ var _isOpen,
 	_windowVisibleSize = {},
 	_renderMaxResolution = false,
 	_orientationChangeTimeout,
+	_container = template.querySelector('.pswp__container'),
 
 
 	// Registers PhotoSWipe module (History, Controller ...)
